@@ -1,0 +1,70 @@
+---
+title: 'Motor Trend MPG Analysis: Manual vs. Automatic'
+author: "Brad Tweardy"
+date: "Sunday, April 19, 2015"
+output: pdf_document
+---
+Executive Summary
+================================================================================
+In this project we use a dataset, mtcars, to analyze a selection of 30 cars (observations) and 11 variables (mpg, cyl, disp, hp, drat, wt, qsec, vs, am, gear, carb). The mission of this report is to use Statistics and Regression Models through Exploratory Data Analysis to answer the following two questions:
+
+1. Is an automatic or manual transmission better for MPG?
+
+2. Quantifying, how different is the MPG between automatic and manual transmissions?
+
+Overall, our results have shown a better result for miles per gallon in manual transmission automobiles versus automatic transmission automobiles. Whether we use just the transmission type or all variables as predictors, we can see evidence in this in the report.
+
+Analysis
+================================================================================
+First, we'll set a few variables to factors then we will conduct a linear model (begin_model) that uses all ten variables as predictors of mpg (see Figure 2 for scatter plot of the results). We use the step function in this model to determine our "best model" (best_model). The step function selects the best variables (cyl, hp, am, wt) in predicting mpg by the Akaike information criterion that implements both forward selection and backward elimination and eliminates variables that are not useful in predicting mpg. We'll then review a summary of our best model.
+
+```{r, results = 'hide'}
+data(mtcars)
+mtcars$cyl <- factor(mtcars$cyl)
+mtcars$vs <- factor(mtcars$vs)
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+mtcars$am <- factor(mtcars$am, labels = c("Automatic", "Manual"))
+begin_model <- lm(mpg ~ ., data = mtcars)
+best_model <- step(begin_model, direction = "both")
+```
+```{r}
+summary(best_model)
+```
+
+From the summary we see that R squared is .84, which tells us that 84% of the variablity is described with our best model.
+
+If we create a basic model (simple) using only transmission type (am) as a predictor for mpg, we can see that manual transmissions have an obvious advantage versus automatic transmissions with regards to their effect on a automobile's MPG (*See Figure 2*).
+
+```{r, results = 'hide'}
+simple <- lm(mpg ~ am, data = mtcars)
+```
+
+Now, we can create a comparison model and compare the basic model to our prior two models (best_model, begin_model). In comparison we can see that the p-value for the begin model is very high so we cannot reject the null hypothesis that the additional variables that it includes from our begin model do not contribute. Conversely, we can reject the null hypothesis in the best model because the p-value is very low.
+
+```{r}
+anova(simple, best_model, begin_model)
+```
+
+Conclusion
+================================================================================
+In conclusion, we can answer our two questions with the conducted analysis.
+
+1. We can say that a manual transmission is better for MPG in automobiles when we adjust for all variables.
+
+2. If we are to keep all variables constant, except for the transmission type, we can say that we see an increase of about 1.8 MPG from automatic to manual transmission.
+
+Appendix
+================================================================================
+**Figure 1**
+```{r, echo = "False"}
+pairs(mtcars)
+```
+
+**Figure 2**
+```{r, echo = "False"}
+library(datasets)
+data(mtcars)
+boxplot(mpg ~ am, data = mtcars, xlab = "Transmission (0 = Automatic, 1 = 
+        Manual)", ylab = "MPG (Miles Per Gallon)")
+```
